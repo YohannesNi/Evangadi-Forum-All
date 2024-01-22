@@ -10,11 +10,11 @@ async function register(req, res) {
   const { username, firstname, lastname, email, password } = req.body;
 
   if (!email || !password || !firstname || !lastname || !username) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ msg: "please provide all required information" });
+    return res.status(StatusCodes.BAD_REQUEST).json({ msg: "please provide all required information!" });
   }
 
   try {
-    const [user] = await dbConnection.query("select username,userid from users where username = ? or email = ?", [username, email]);
+    const [user] = await dbConnection.query("SELECT username,userid from users where username = ? or email = ?", [username, email]);
     if (user.length > 0) {
       return res.status(StatusCodes.BAD_REQUEST).json({ msg: "user already existed" });
     }
@@ -33,7 +33,7 @@ async function register(req, res) {
       email,
       hashedPassword,
     ]);
-    return res.status(StatusCodes.CREATED).json({ msg: "user register" });
+    return res.status(StatusCodes.CREATED).json({ msg: "user created" });
   } catch (error) {
     console.log(error.message);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ msg: "something went wrong, try again later!" });
@@ -46,7 +46,7 @@ async function login(req, res) {
     return res.status(StatusCodes.BAD_REQUEST).json({ msg: "please enter all required fields" });
   }
   try {
-    const [user] = await dbConnection.query("select username,userid,password from users where email = ?", [email]);
+    const [user] = await dbConnection.query("SELECT username,userid,password from users where email = ?", [email]);
     if (user.length == 0) {
       return res.status(StatusCodes.BAD_REQUEST).json({ msg: "invalid credential" });
     }
@@ -55,7 +55,7 @@ async function login(req, res) {
     if (!isMatch) {
       return res.status(StatusCodes.BAD_REQUEST).json({ msg: "invalid credentail" });
     }
-
+    // JWT
     const username = user[0].username;
     const userid = user[0].userid;
     const token = jwt.sign({ username, userid }, process.env.JWT_SECRET, { expiresIn: "1d" });
